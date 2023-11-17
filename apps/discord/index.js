@@ -1,9 +1,11 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { Client, Collection, GatewayIntentBits } = require("discord.js");
-const { token } = require("./config.json");
+const { token, channelId } = require("./config.json");
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+});
 
 module.exports = {
   client,
@@ -47,3 +49,24 @@ for (const file of eventFiles) {
 }
 
 client.login(token);
+
+client.on("ready", async () => {
+  let channel = client.channels.cache.get(channelId);
+  if (!channel) {
+    console.log("Channel not found");
+    channel = await client.channels.fetch(channelId);
+  }
+
+  const collector = channel.createMessageCollector({ mentions: client.user });
+
+  collector.on("collect", (message) => {
+    if (message.author.bot) return;
+    // Get username from message
+    const username = message.author.username;
+    // Get message content
+    const content = message.content;
+
+    // Send message
+    channel.send(`Hello ${username}, you said: ${content}`);
+  });
+});
