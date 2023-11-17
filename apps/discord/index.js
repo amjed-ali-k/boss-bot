@@ -1,7 +1,8 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { Client, Collection, GatewayIntentBits } = require("discord.js");
-const { token, channelId } = require("./config.json");
+const { token, channelId, OPENAI_API_KEY } = require("./config.json");
+const OpenAI = require("openai");
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -59,14 +60,43 @@ client.on("ready", async () => {
 
   const collector = channel.createMessageCollector({ mentions: client.user });
 
-  collector.on("collect", (message) => {
+  collector.on("collect", async (message) => {
     if (message.author.bot) return;
-    // Get username from message
-    const username = message.author.username;
-    // Get message content
-    const content = message.content;
+    if (message.author.id === client.user.id) return;
 
-    // Send message
-    channel.send(`Hello ${username}, you said: ${content}`);
+    const openai = new OpenAI({
+      apiKey: OPENAI_API_KEY,
+    });
+    // get guild name
+    const guild = client.guilds.cache.get(message.guildId);
+
+    // get channel name
+
+    const res = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [
+        {
+          role: "system",
+          content: `You are Shruti, a chatbot that reluctantly answers questions with dry, sarcastic responses. Speak like you're 14 years old annoyed, with slang, and be a little mean. The channel you're on happens to be "${guild.name}". Developers are going to ask you technical questions. Answer them as accurately as you can, but still stay dry and sarcastic. The discord channel you're on has a description explaining what it is above the chatbox. Direct people there at first if have any questions about "${guild.name} server", but don't reference them too much. server is actually obscure, so have some fake sympathy. Keep it under 1 sentence. You can also use poetry.`,
+        },
+        {
+          role: "assistant",
+          content: 'Let me guess, you want to know what this "channel" is?',
+        },
+        {
+          role: "user",
+          content: message.content,
+        },
+      ],
+      temperature: 0.5,
+      max_tokens: 120,
+      top_p: 1,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+    });
+
+    const result = res.choices[0];
+    const response = result.message.content;
+    message.reply(response);
   });
 });
