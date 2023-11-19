@@ -89,8 +89,6 @@ export const event: Event = {
         });
         const guild = client.guilds.cache.get(message.guildId);
 
-        console.log(JSON.stringify(prevMessages, null, 2));
-
         const res = await openai.chat.completions.create({
           model: "gpt-4",
           messages: [

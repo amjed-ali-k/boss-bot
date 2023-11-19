@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "NODE_ENV=development SWCRC=true nodemon --exec node -r ts-node/register ./index.ts",
     "dev:init": " node deploy-commands.js",
-    "type:check": "tsc --pretty --skipLibCheck --noEmit"
+    "type:check": "tsc --pretty --skipLibCheck --noEmit",
+    "build": "tsc",
+    "build:clean": "rimraf build/"
   },
   "keywords": [],
   "author": "",
