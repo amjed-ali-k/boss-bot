@@ -2,11 +2,13 @@
   "name": "discord",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node .",
-    "dev:init": "node deploy-commands.js"
+    "dev": "ts-node ./index.ts --esm",
+    "dev:init": "node deploy-commands.js",
+    "type:check": "tsc --pretty --skipLibCheck --noEmit"
   },
   "keywords": [],
   "author": "",
@@ -14,9 +16,13 @@
   "dependencies": {
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
-    "openai": "^4.19.0"
+    "openai": "^4.19.0",
+    "typescript": "^5.2.2"
   },
   "devDependencies": {
-    "eslint": "^8.53.0"
+    "@types/node": "^20.8.10",
+    "eslint": "^8.53.0",
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.1"
   }
 }

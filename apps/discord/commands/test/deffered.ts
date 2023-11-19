@@ -1,7 +1,13 @@
-const { SlashCommandBuilder } = require("discord.js");
-const wait = require("node:timers/promises").setTimeout;
+import { SlashCommandBuilder } from "discord.js";
+import { setTimeout } from "node:timers/promises";
 
-module.exports = {
+interface Command {
+  cooldown: number;
+  data: any;
+  execute: (interaction: any) => Promise<void>;
+}
+
+const command: Command = {
   cooldown: 5,
   data: new SlashCommandBuilder()
     .setName("deffered")
@@ -14,14 +20,16 @@ module.exports = {
     ),
   async execute(interaction) {
     await interaction.deferReply();
-    await wait(4000);
+    await setTimeout(4000);
     await interaction.editReply("Pong!");
     const user = await interaction.client.users.fetch(interaction.user.id);
     console.log(user);
     console.log(interaction);
     // const message = await interaction.fetchReply();
     // console.log(message);
-    await wait(5000);
+    await setTimeout(5000);
     await interaction.deleteReply();
   },
 };
+
+export default command;

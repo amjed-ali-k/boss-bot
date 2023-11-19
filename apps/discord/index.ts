@@ -1,16 +1,23 @@
-const fs = require("node:fs");
-const path = require("node:path");
-const { Client, Collection, GatewayIntentBits } = require("discord.js");
-const { token, channelId, OPENAI_API_KEY } = require("./config.json");
-const OpenAI = require("openai");
+import fs from "fs";
+import path from "path";
+import { Client, Collection, GatewayIntentBits, TextChannel } from "discord.js";
+import { token, channelId, OPENAI_API_KEY } from "./config.json";
+import OpenAI from "openai";
 
-const client = new Client({
+interface Command {
+  data: any;
+  execute: any;
+}
+
+interface Event {
+  once: boolean;
+  name: string;
+  execute: any;
+}
+
+const client: Client & { commands?: Collection<string, Command> } = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
 });
-
-module.exports = {
-  client,
-};
 
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, "commands");
@@ -23,7 +30,7 @@ for (const folder of commandFolders) {
     .filter((file) => file.endsWith(".js"));
   for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
-    const command = require(filePath);
+    const command: Command = require(filePath);
     if ("data" in command && "execute" in command) {
       client.commands.set(command.data.name, command);
     } else {
@@ -41,7 +48,7 @@ const eventFiles = fs
 
 for (const file of eventFiles) {
   const filePath = path.join(eventsPath, file);
-  const event = require(filePath);
+  const event: Event = require(filePath);
   if (event.once) {
     client.once(event.name, (...args) => event.execute(...args));
   } else {
@@ -52,13 +59,15 @@ for (const file of eventFiles) {
 client.login(token);
 
 client.on("ready", async () => {
-  let channel = client.channels.cache.get(channelId);
+  let channel = client.channels.cache.get(channelId) as TextChannel;
   if (!channel) {
     console.log("Channel not found");
-    channel = await client.channels.fetch(channelId);
+    channel = (await client.channels.fetch(channelId)) as TextChannel;
   }
 
-  const collector = channel.createMessageCollector({ mentions: client.user });
+  const collector = channel.createMessageCollector({
+    filter: (m) => m.author.id !== client.user.id,
+  });
 
   collector.on("collect", async (message) => {
     if (message.author.bot) return;
@@ -67,21 +76,18 @@ client.on("ready", async () => {
     const openai = new OpenAI({
       apiKey: OPENAI_API_KEY,
     });
-    // get guild name
     const guild = client.guilds.cache.get(message.guildId);
-
-    // get channel name
 
     const res = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         {
           role: "system",
-          content: `You are Shruti, a chatbot that reluctantly answers questions with dry, sarcastic responses. Speak like you're 14 years old annoyed, with slang, and be a little mean. The channel you're on happens to be "${guild.name}". Developers are going to ask you technical questions. Answer them as accurately as you can, but still stay dry and sarcastic. The discord channel you're on has a description explaining what it is above the chatbox. Direct people there at first if have any questions about "${guild.name} server", but don't reference them too much. server is actually obscure, so have some fake sympathy. Keep it under 1 sentence. You can also use poetry.`,
+          content: `You are Shruti, a chatbot that reluctantly answers questions with dry, sarcastic responses. Speak like you're 14 years old annoyed, with slang, and be a little mean. The channel you're on happens to be "${guild.name}". Developers are going to ask you technical questions. Answer them as accurately as you can, but still stay dry and sarcastic. Direct people there at first if have any questions about "${guild.name} server", but don't reference them too much. server is actually obscure, so have some fake sympathy. Keep it under 1 sentence. You can also use poetry.`,
         },
         {
           role: "assistant",
-          content: 'Let me guess, you want to know what this "channel" is?',
+          content: `Let me guess, you want to know what this ${guild.name} is?`,
         },
         {
           role: "user",
