@@ -12,10 +12,6 @@ interface Event {
   execute: (client: Client) => void;
 }
 
-const subscribed: { guildId: string; channelIds: string[] }[] = [
-  { guildId, channelIds: [channelId] },
-];
-
 export const event: Event = {
   name: Events.ClientReady,
   once: true,
@@ -35,8 +31,8 @@ export const event: Event = {
       });
 
       collector.on("collect", async (message) => {
-        if (message.author.bot) return;
-        if (message.author.id === client.user.id) return;
+        // Skip all other bot messages
+        if (message.author.bot && message.author.id !== client.user.id) return;
 
         // message content is empty
         if (message.content.length === 0) return;
@@ -45,11 +41,23 @@ export const event: Event = {
           message.reply(`Just ${message.content}?`);
         }
 
-        // message content is too long
+        // Message content is too long + this doesn't store on db. If it is in db, it will be attached with prompts also, I don't want that much OpenAPI bill.
         if (message.content.length > 150) {
           message.reply(draw(overlimit));
           return;
         }
+
+        // Store message in the db
+        db.channelMessage.create({
+          data: {
+            content: message.content,
+            userId: message.author.id,
+            userName: message.author.username,
+            channelId: chnl.id,
+          },
+        });
+
+        if (message.author.id === client.user.id) return;
 
         // fetch messages
         db.channelMessage.findMany({
@@ -61,15 +69,6 @@ export const event: Event = {
             userId: message.author.id,
           },
           take: 10,
-        });
-
-        db.channelMessage.create({
-          data: {
-            content: message.content,
-            userId: message.author.id,
-            userName: message.author.username,
-            channelId: chnl.id,
-          },
         });
 
         log(`[DEBUG] ${message.author.username} said: ${message.content}`);
