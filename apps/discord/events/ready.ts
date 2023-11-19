@@ -1,5 +1,5 @@
 import { Client, Events } from "discord.js";
-import { log } from "@utils/logger";
+import { log } from "../utils/logger";
 
 interface Event {
   name: Events;
@@ -7,12 +7,10 @@ interface Event {
   execute: (client: Client) => void;
 }
 
-const event: Event = {
+export const event: Event = {
   name: Events.ClientReady,
   once: true,
   execute(client: Client) {
     log(`Ready! Logged in as ${client.user.tag}`);
   },
 };
-
-export default event;

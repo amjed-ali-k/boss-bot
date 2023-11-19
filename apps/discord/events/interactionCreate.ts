@@ -16,7 +16,7 @@ type InteractionWithCommandClient = {
   client: ClientWithCommands;
 } & Interaction;
 
-export const interactionCreate = {
+export const event = {
   name: Events.InteractionCreate,
   async execute(interaction: InteractionWithCommandClient) {
     if (!interaction.isCommand()) return;

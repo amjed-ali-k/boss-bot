@@ -1,5 +1,5 @@
 import { Client, Events, TextChannel } from "discord.js";
-import { log } from "@utils/logger";
+import { log } from "../utils/logger";
 import { channelId, OPENAI_API_KEY, guildId } from "./../config.json";
 import OpenAI from "openai";
 
@@ -13,7 +13,7 @@ const subscribed: { guildId: string; channelIds: string[] }[] = [
   { guildId, channelIds: [channelId] },
 ];
 
-const event: Event = {
+export const event: Event = {
   name: Events.ClientReady,
   once: true,
   execute: (client: Client) => {
@@ -30,7 +30,7 @@ const event: Event = {
         collector.on("collect", async (message) => {
           if (message.author.bot) return;
           if (message.author.id === client.user.id) return;
-
+          log(`[DEBUG] ${message.author.username} said: ${message.content}`);
           const openai = new OpenAI({
             apiKey: OPENAI_API_KEY,
           });

@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
     "target": "es2021",
-    "module": "es2022",
+    "module": "CommonJS",
     "lib": ["es2021"],
     "declaration": true,
     "sourceMap": true,
     "outDir": "./dist",
     "rootDir": ".",
+
     "strict": false,
     "moduleResolution": "node",
     "esModuleInterop": true,
@@ -15,7 +16,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "verbatimModuleSyntax": true,
     "baseUrl": "./",
     "paths": {
       "@utils/*": ["utils/*"]
