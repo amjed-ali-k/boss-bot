@@ -22,18 +22,13 @@ export default async function DashboardPage() {
     redirect(authOptions?.pages?.signIn || "/login")
   }
 
-  // Get the status of the current user
-  const status = await db.status.findUnique({
-    where: { userId: user.id },
-  })
-
   return (
     <DashboardShell>
       <DashboardHeader heading="Dashboard" text="">
         {/* <PostCreateButton /> */}
       </DashboardHeader>
       <div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -84,7 +79,7 @@ export default async function DashboardPage() {
               </p>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
     </DashboardShell>
   )

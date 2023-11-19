@@ -3,7 +3,7 @@ import path from "path";
 import { Client, Collection, GatewayIntentBits } from "discord.js";
 import { token } from "./config.json";
 import { log } from "./utils/logger";
-import db from "db/db";
+import db from "./db/db";
 
 interface Command {
   data: any;

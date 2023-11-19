@@ -56,9 +56,10 @@ model User {
 
   roles String[] @default(["USER"])
 
-  accounts Account[]
-  sessions Session[]
-  Post     Post[]
+  accounts    Account[]
+  sessions    Session[]
+  Post        Post[]
+  GuildMember GuildMember[]
 
   @@map(name: "users")
 }
@@ -84,4 +85,71 @@ model Post {
   author User @relation(fields: [authorId], references: [id])
 
   @@map(name: "posts")
+}
+
+model Guild {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @map(name: "updated_at")
+
+  members   GuildMember[]
+  GuildRole GuildRole[]
+  Channel   Channel[]
+
+  @@map(name: "guilds")
+}
+
+model GuildMember {
+  id        String   @id @default(cuid())
+  userId    String
+  guildId   String
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @map(name: "updated_at")
+
+  user  User  @relation(fields: [userId], references: [id])
+  guild Guild @relation(fields: [guildId], references: [id])
+
+  @@map(name: "guild_members")
+}
+
+model GuildRole {
+  id        String   @id @default(cuid())
+  name      String
+  guildId   String
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @map(name: "updated_at")
+
+  guild Guild @relation(fields: [guildId], references: [id])
+
+  @@map(name: "guild_roles")
+}
+
+model Channel {
+  id        String   @id @default(cuid())
+  name      String
+  guildId   String
+  disabled Boolean @default(false)
+  flavour String?
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @map(name: "updated_at")
+
+  guild          Guild            @relation(fields: [guildId], references: [id])
+  ChannelMessage ChannelMessage[]
+
+  @@map(name: "channels")
+}
+
+model ChannelMessage {
+  id        String   @id @default(cuid())
+  content   String
+  channelId String
+  userId    String
+  userName  String
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @map(name: "updated_at")
+
+  channel Channel @relation(fields: [channelId], references: [id])
+
+  @@map(name: "channel_messages")
 }
