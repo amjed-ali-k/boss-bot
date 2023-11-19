@@ -128,7 +128,6 @@ export const event: Event = {
           })
         );
         message.reply(response);
-
         await Promise.all(unresolvedPromises);
       });
     });
