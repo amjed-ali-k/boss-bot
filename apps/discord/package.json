@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.ts",
-  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node ./index.ts --esm",
-    "dev:init": "node deploy-commands.js",
+    "dev": "NODE_ENV=development SWCRC=true nodemon --exec  node -r @swc-node/register ./index.ts | pino-pretty",
+    "dev:init": " node deploy-commands.js",
     "type:check": "tsc --pretty --skipLibCheck --noEmit"
   },
   "keywords": [],
@@ -17,12 +16,23 @@
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
     "openai": "^4.19.0",
+    "pino": "^8.16.2",
+    "pino-pretty": "^10.2.3",
     "typescript": "^5.2.2"
   },
   "devDependencies": {
+    "@swc-node/register": "^1.6.8",
+    "@swc/cli": "^0.1.63",
+    "@swc/core": "^1.3.96",
     "@types/node": "^20.8.10",
     "eslint": "^8.53.0",
     "nodemon": "^3.0.1",
     "ts-node": "^10.9.1"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "**/test/**",
+      "**/docs/**"
+    ]
   }
 }

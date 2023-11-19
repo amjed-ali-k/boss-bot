@@ -15,7 +15,11 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "baseUrl": "./",
+    "paths": {
+      "@utils/*": ["utils/*"]
+    }
   },
   "ts-node": {
     "esm": true

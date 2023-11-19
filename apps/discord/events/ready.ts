@@ -1,4 +1,5 @@
 import { Client, Events } from "discord.js";
+import { log } from "@utils/logger";
 
 interface Event {
   name: Events;
@@ -10,7 +11,7 @@ const event: Event = {
   name: Events.ClientReady,
   once: true,
   execute(client: Client) {
-    console.log(`Ready! Logged in as ${client.user.tag}`);
+    log(`Ready! Logged in as ${client.user.tag}`);
   },
 };
 
