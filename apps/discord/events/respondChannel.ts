@@ -1,6 +1,6 @@
 import { Client, Events, Message, TextChannel } from "discord.js";
 import { log } from "../utils/logger";
-import { channelId, OPENAI_API_KEY, guildId } from "./../config.json";
+import { OPENAI_API_KEY } from "./../config.json";
 import OpenAI from "openai";
 import { draw } from "radash";
 import { overlimit } from "../data/overflow.json";
@@ -24,17 +24,18 @@ export const event: Event = {
 
     channels.forEach((chnl) => {
       client.channels.cache.get(chnl.id);
-      const channel = client.channels.cache.get(channelId) as TextChannel;
+      const channel = client.channels.cache.get(chnl.id) as TextChannel;
 
       const collector = channel.createMessageCollector({
         filter: (m) => m.author.id !== client.user.id,
       });
 
       collector.on("collect", async (message) => {
+        let unresolvedPromises: Promise<any>[] = [];
         // Skip all other bot messages
         if (message.author.bot && message.author.id !== client.user.id) return;
 
-        // message content is empty
+        // Message content is empty
         if (message.content.length === 0) return;
 
         if (message.content.length === 1) {
@@ -47,35 +48,48 @@ export const event: Event = {
           return;
         }
 
-        // Store message in the db
-        db.channelMessage.create({
-          data: {
-            content: message.content,
-            userId: message.author.id,
-            userName: message.author.username,
-            channelId: chnl.id,
-          },
-        });
+        if (message.author.id === client.user.id) {
+          return;
+        }
 
-        if (message.author.id === client.user.id) return;
+        // Store message in the db
+        unresolvedPromises.push(
+          db.channelMessage.create({
+            data: {
+              content: message.content,
+              userId: message.author.id,
+              userName: message.author.username,
+              channelId: chnl.id,
+            },
+          })
+        );
 
         // fetch messages
-        db.channelMessage.findMany({
-          orderBy: {
-            createdAt: "desc",
-          },
-          where: {
-            channelId: chnl.id,
-            userId: message.author.id,
-          },
-          take: 10,
-        });
+        const prevMessages = (
+          await db.channelMessage.findMany({
+            orderBy: {
+              createdAt: "desc",
+            },
+            where: {
+              channelId: chnl.id,
+              userId: {
+                in: [client.user.id, message.author.id],
+              },
+            },
+            take: 10,
+          })
+        ).map((m) => ({
+          role: m.userId === client.user.id ? "assistant" : "user",
+          content: m.content,
+        }));
 
         log(`[DEBUG] ${message.author.username} said: ${message.content}`);
         const openai = new OpenAI({
           apiKey: OPENAI_API_KEY,
         });
         const guild = client.guilds.cache.get(message.guildId);
+
+        console.log(JSON.stringify(prevMessages, null, 2));
 
         const res = await openai.chat.completions.create({
           model: "gpt-4",
@@ -92,6 +106,7 @@ export const event: Event = {
               role: "user",
               content: message.content,
             },
+            ...(prevMessages as any[]),
           ],
           temperature: 0.5,
           max_tokens: 120,
@@ -102,7 +117,19 @@ export const event: Event = {
 
         const result = res.choices[0];
         const response = result.message.content;
+        unresolvedPromises.push(
+          db.channelMessage.create({
+            data: {
+              content: response,
+              userId: client.user.id,
+              userName: client.user.username,
+              channelId: chnl.id,
+            },
+          })
+        );
         message.reply(response);
+
+        await Promise.all(unresolvedPromises);
       });
     });
   },
