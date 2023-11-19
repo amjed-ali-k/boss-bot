@@ -51,6 +51,27 @@ export const event: Event = {
           return;
         }
 
+        // fetch messages
+        db.channelMessage.findMany({
+          orderBy: {
+            createdAt: "desc",
+          },
+          where: {
+            channelId: chnl.id,
+            userId: message.author.id,
+          },
+          take: 10,
+        });
+
+        db.channelMessage.create({
+          data: {
+            content: message.content,
+            userId: message.author.id,
+            userName: message.author.username,
+            channelId: chnl.id,
+          },
+        });
+
         log(`[DEBUG] ${message.author.username} said: ${message.content}`);
         const openai = new OpenAI({
           apiKey: OPENAI_API_KEY,
