@@ -1,7 +1,9 @@
-import { Client, Events, TextChannel } from "discord.js";
+import { Client, Events, Message, TextChannel } from "discord.js";
 import { log } from "../utils/logger";
 import { channelId, OPENAI_API_KEY, guildId } from "./../config.json";
 import OpenAI from "openai";
+import { draw } from "radash";
+import { overlimit } from "../data/overflow.json";
 
 interface Event {
   name: Events;
@@ -30,7 +32,21 @@ export const event: Event = {
         collector.on("collect", async (message) => {
           if (message.author.bot) return;
           if (message.author.id === client.user.id) return;
+
+          // message content is empty
+          if (message.content.length === 0) return;
+
+          if (message.content.length === 1) {
+            message.reply(`Just ${message.content}?`);
+          }
+
+          // message content is too long
+          if (message.content.length > 150) {
+            message.reply(draw(overlimit));
+            return;
+          }
           log(`[DEBUG] ${message.author.username} said: ${message.content}`);
+          log(message.content.length);
           const openai = new OpenAI({
             apiKey: OPENAI_API_KEY,
           });

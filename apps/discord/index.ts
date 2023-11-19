@@ -16,7 +16,11 @@ interface Event {
 }
 
 const client: Client & { commands?: Collection<string, Command> } = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
 client.commands = new Collection();
@@ -30,7 +34,7 @@ for (const folder of commandFolders) {
     .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
   for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
-    const command: Command = require(filePath);
+    const command: Command = require(filePath).default;
     if ("data" in command && "execute" in command) {
       client.commands.set(command.data.name, command);
     } else {
@@ -49,7 +53,7 @@ const eventFiles = fs
 for (const file of eventFiles) {
   const filePath = path.join(eventsPath, file);
   // fetch event from file
-  const event: Event = require(filePath).event;
+  const event: Event = require(filePath).default;
   if (event.once) {
     client.once(event.name, (...args) => event.execute(...args));
   } else {

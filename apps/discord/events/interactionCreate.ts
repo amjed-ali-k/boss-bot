@@ -38,3 +38,5 @@ export const event = {
     }
   },
 };
+
+export default event;

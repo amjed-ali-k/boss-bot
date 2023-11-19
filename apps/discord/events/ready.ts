@@ -14,3 +14,4 @@ export const event: Event = {
     log(`Ready! Logged in as ${client.user.tag}`);
   },
 };
+export default event;

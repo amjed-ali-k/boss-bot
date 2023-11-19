@@ -5,8 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "NODE_ENV=development SWCRC=true nodemon --exec  pnpm run dev:direct",
-    "dev:direct": "node -r ts-node/register ./index.ts",
+    "dev": "NODE_ENV=development SWCRC=true nodemon --exec node -r ts-node/register ./index.ts",
     "dev:init": " node deploy-commands.js",
     "type:check": "tsc --pretty --skipLibCheck --noEmit"
   },
@@ -20,6 +19,7 @@
     "pino": "^8.16.2",
     "pino-pretty": "^10.2.3",
     "pino-tee": "^0.3.0",
+    "radash": "^11.0.0",
     "typescript": "^5.2.2"
   },
   "devDependencies": {
