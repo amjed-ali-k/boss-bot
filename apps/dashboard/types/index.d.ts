@@ -1,4 +1,4 @@
-import { User } from "@prisma/client"
+import { User } from "database"
 import type { Icon } from "lucide-react"
 
 import { Icons } from "@/components/icons"
@@ -55,7 +55,6 @@ export type DashboardConfig = {
 export type SubscriptionPlan = {
   name: string
   description: string
-
 }
 
 export type UserSubscriptionPlan = SubscriptionPlan &
