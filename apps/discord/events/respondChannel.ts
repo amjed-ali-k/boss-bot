@@ -52,8 +52,11 @@ export const event: Event = {
           return;
         }
 
-        // if user mention anyone else, skip
-        if (message.mentions.members.size > 1) {
+        // if user mention anyone else other than bot, skip
+        if (
+          message.mentions.members.size > 0 &&
+          message.mentions.members.first().id !== client.user.id
+        ) {
           return;
         }
 
