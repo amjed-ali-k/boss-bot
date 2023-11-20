@@ -52,6 +52,11 @@ export const event: Event = {
           return;
         }
 
+        // if user mention anyone else, skip
+        if (message.mentions.members.size > 1) {
+          return;
+        }
+
         // Store message in the db
         unresolvedPromises.push(
           db.channelMessage.create({
